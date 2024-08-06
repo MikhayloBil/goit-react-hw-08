@@ -1,6 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchContacts, addContact, deleteContact } from "./operations";
+import {
+  fetchContacts,
+  addContact,
+  deleteContact,
+  updateContact,
+} from "./operations";
 import { logout } from "../auth/operations";
+import { toast } from "react-hot-toast";
 
 const contactsSlice = createSlice({
   name: "contacts",
@@ -31,6 +37,7 @@ const contactsSlice = createSlice({
       .addCase(addContact.fulfilled, (state, action) => {
         state.items.push(action.payload);
         state.loading = false;
+        toast.success("Contact added successfully!");
       })
       .addCase(addContact.rejected, (state) => {
         state.loading = false;
@@ -45,6 +52,7 @@ const contactsSlice = createSlice({
           (item) => item.id !== action.payload.id
         );
         state.loading = false;
+        toast.success("Contact deleted successfully!");
       })
       .addCase(deleteContact.rejected, (state) => {
         state.loading = false;
@@ -54,6 +62,24 @@ const contactsSlice = createSlice({
         state.items = [];
         state.error = null;
         state.loading = false;
+      })
+      .addCase(updateContact.pending, (state) => {
+        state.loading = true;
+        state.error = false;
+      })
+      .addCase(updateContact.fulfilled, (state, action) => {
+        const index = state.items.findIndex(
+          (contact) => contact.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.items[index] = action.payload;
+        }
+        state.loading = false;
+        toast.success("Contact updated successfully!");
+      })
+      .addCase(updateContact.rejected, (state) => {
+        state.loading = false;
+        state.error = true;
       });
   },
 });
